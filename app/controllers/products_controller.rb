@@ -1,12 +1,12 @@
 
 class ProductsController < ApplicationController
-  # Retrieve all products for the index page.
+  # Load products and their categories together to prevent N+1 queries.
   def index
-    @products = Product.all
+    @products = Product.includes(:category).all
   end
 
-  # Find the individual product selected by the user.
+  # Load a single product and its category.
   def show
-    @product = Product.find(params[:id])
+    @product = Product.includes(:category).find(params[:id])
   end
 end

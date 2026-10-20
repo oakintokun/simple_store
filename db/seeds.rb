@@ -1,17 +1,30 @@
 
-require "faker"
+require "csv"
 
-# Remove existing products to prevent duplicates when reseeding.
-Product.destroy_all
+# Remove existing products before importing the CSV data.
+Product.delete_all
+Category.delete_all
 
-# Generate 676 sample products using Faker.
-676.times do
+# Locate the CSV file inside the db folder.
+csv_file = Rails.root.join("db", "products.csv")
+
+# Read each CSV row using its column headings.
+CSV.foreach(csv_file, headers: true) do |row|
+  # Find an existing category or create a new one.
+  category = Category.find_or_create_by!(
+    name: row["category"]
+  )
+
+  # Create a product associated with its category.
   Product.create!(
-    title: Faker::Commerce.product_name,
-    price: Faker::Commerce.price(range: 5.0..500.0),
-    stock_quantity: Faker::Number.between(from: 0, to: 100)
+    title: row["name"],
+    description: row["description"],
+    price: row["price"],
+    stock_quantity: row["stock quantity"],
+    category: category
   )
 end
 
-# Display the total number of products created.
-puts "Successfully created #{Product.count} products."
+# Display the number of records imported.
+puts "Successfully imported #{Product.count} products."
+puts "Successfully created #{Category.count} categories."
